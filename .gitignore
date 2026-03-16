@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Setup
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDES
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Datasets
+dataset/images/
+dataset/labels/
+dataset/test_weather/
+dataset/test_enhanced/
+!dataset/dataset.yaml
+
+# Models
+models/*.pt
+runs/
+
+# Results
+results/graphs/
+results/evaluation_metrics.csv
+results/comparison_results.csv
