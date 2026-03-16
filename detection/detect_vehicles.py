@@ -4,6 +4,15 @@ from ultralytics import YOLO
 import argparse
 from collections import defaultdict
 
+def get_color_and_text_color(cls_name):
+    cls_name = cls_name.lower()
+    # 4-Wheelers and heavy vehicles get Crimson (Red/Pinkish) and White text
+    if cls_name in ["car", "bus", "truck", "magic-vehicle", "magic_vehicle"]:
+        return (60, 20, 220), (255, 255, 255) 
+    # 2/3-Wheelers get Green and Black text
+    else:
+        return (50, 205, 50), (0, 0, 0)
+
 def draw_boxes(frame, results, class_names):
     """Draws bounding boxes and labels on the frame, counting occurrences."""
     counts = defaultdict(int)
@@ -13,21 +22,26 @@ def draw_boxes(frame, results, class_names):
         for box in boxes:
             x1, y1, x2, y2 = map(int, box.xyxy[0])
             cls_id = int(box.cls[0])
-            conf = float(box.conf[0])
             
             label = class_names[cls_id] if cls_id < len(class_names) else str(cls_id)
-            counts[label] += 1
+            # Replace underscore with hyphen to match user image standard
+            label_display = label.replace('_', '-')
+            counts[label_display] += 1
+            
+            bg_color, txt_color = get_color_and_text_color(label_display)
             
             # Draw bounding box
-            cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+            cv2.rectangle(frame, (x1, y1), (x2, y2), bg_color, 2)
             
-            # Draw label background
-            text = f"{label} {conf:.2f}"
-            (w, h), _ = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 2)
-            cv2.rectangle(frame, (x1, y1 - 20), (x1 + w, y1), (0, 255, 0), -1)
+            # Get text dimensions
+            text = f"{label_display}"
+            (w, h), _ = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, 0.7, 2)
             
-            # Draw text
-            cv2.putText(frame, text, (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 2)
+            # Draw solid background for text
+            cv2.rectangle(frame, (x1, y1 - 30), (x1 + w + 10, y1), bg_color, -1)
+            
+            # Draw text over background
+            cv2.putText(frame, text, (x1 + 5, y1 - 8), cv2.FONT_HERSHEY_SIMPLEX, 0.7, txt_color, 2)
             
     return frame, counts
 
